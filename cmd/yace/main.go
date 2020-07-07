@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ivx/yet-another-cloudwatch-exporter/pkg"
+	exporter "github.com/ivx/yet-another-cloudwatch-exporter/pkg"
 )
 
 var version = "custom-build"
