@@ -729,7 +729,7 @@ func migrateCloudwatchToPrometheus(cwd []*cloudwatchData) []*PrometheusMetric {
 				promLabels["name"] = *c.ID
 
 				for _, label := range c.CustomTags {
-					promLabels["custom_tag_"+label.Key] = label.Value
+					promLabels["custom_tag_"+promStringTag(label.Key)] = label.Value
 				}
 				for _, tag := range c.Tags {
 					promLabels["tag_"+promStringTag(tag.Key)] = tag.Value
