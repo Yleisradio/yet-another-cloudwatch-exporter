@@ -214,6 +214,9 @@ func scrapeDiscoveryJobUsingMetricData(
 				log.Infof("job: %s, resource: %v/%v, dimensionsWithValue: %v", job.Type, *resource.Service, *resource.ID, dimensionsWithValue)
 			}
 
+			// Filter the commonJob Dimensions by the discovered/added dimensions as duplicates cause no metrics to be discovered
+			commonJobDimensions = filterDimensionsWithoutValueByDimensionsWithValue(commonJobDimensions, dimensionsWithValue)
+
 			metricsToAdd := filterMetricsBasedOnDimensionsWithValues(dimensionsWithValue, commonJobDimensions, fullMetricsList)
 			if job.Type == "acm-certificates" {
 				log.Infof("job: %s, resource: %v/%v, metricsToAdd: %v", job.Type, *resource.Service, *resource.ID, metricsToAdd)
