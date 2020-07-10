@@ -35,7 +35,6 @@ func scrapeAwsData(config conf) ([]*tagsData, []*cloudwatchData) {
 					clientCloudwatch := cloudwatchInterface{
 						client: createCloudwatchSession(&region, roleArn),
 					}
-
 					clientTag := tagsInterface{
 						client:    createTagSession(&region, roleArn),
 						asgClient: createASGSession(&region, roleArn),
