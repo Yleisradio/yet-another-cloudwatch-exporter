@@ -127,6 +127,23 @@ func scrapeStaticJob(resource static, region string, clientCloudwatch cloudwatch
 	return cw
 }
 
+func getMetricDataInputLength(job job) int {
+	var length int
+
+	// Why is this here? 120?
+	if job.Length == 0 {
+		length = 120
+	} else {
+		length = job.Length
+	}
+	for _, metric := range job.Metrics {
+		if metric.Length > length {
+			length = metric.Length
+		}
+	}
+	return length
+}
+
 func scrapeDiscoveryJobUsingMetricData(
 	job job,
 	region string,
@@ -138,15 +155,7 @@ func scrapeDiscoveryJobUsingMetricData(
 	mux := &sync.Mutex{}
 	var wg sync.WaitGroup
 	var getMetricDatas []cloudwatchData
-	var length int
 	var jobPeriod int
-
-	// Why is this here? 120?
-	if job.Length == 0 {
-		length = 120
-	} else {
-		length = job.Length
-	}
 
 	// Set a default period
 	if job.Period == 0 {
@@ -179,10 +188,6 @@ func scrapeDiscoveryJobUsingMetricData(
 	// For every metric of the job
 	for j := range job.Metrics {
 		metric := job.Metrics[j]
-
-		if metric.Length > length {
-			length = metric.Length
-		}
 
 		// Get the full list of metrics
 		// This includes, for this metric the possible combinations
@@ -255,6 +260,7 @@ func scrapeDiscoveryJobUsingMetricData(
 	wg.Wait()
 	maxMetricCount := *metricsPerQuery
 	metricDataLength := len(getMetricDatas)
+	length := getMetricDataInputLength(job)
 	partition := int(math.Ceil(float64(metricDataLength) / float64(maxMetricCount)))
 	log.Infof("job.Type: %s, metricDataLength: %d, maxMetricCount: %d, partition: %d", job.Type, metricDataLength, maxMetricCount, partition)
 	wg.Add(partition)
