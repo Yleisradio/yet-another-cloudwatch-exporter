@@ -13,7 +13,7 @@ ENV GOARCH amd64
 ENV CGO_ENABLED=0
 
 ARG VERSION
-RUN go build -v -ldflags "-X main.version=$VERSION" -o yace
+RUN go build -race -v -ldflags "-X main.version=$VERSION" -o yace
 
 FROM alpine:latest
 
