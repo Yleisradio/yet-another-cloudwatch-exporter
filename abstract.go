@@ -144,7 +144,7 @@ func getMetricDataInputLength(job job) int {
 	return length
 }
 
-func metricPeriod(job job, metric metric) int64 {
+func getMetricPeriod(job job, metric metric) int64 {
 	if metric.Period != 0 {
 		return int64(metric.Period)
 	}
@@ -165,24 +165,6 @@ func scrapeDiscoveryJobUsingMetricData(
 	mux := &sync.Mutex{}
 	var wg sync.WaitGroup
 	var getMetricDatas []cloudwatchData
-<<<<<<< HEAD
-	var jobPeriod int
-
-	// Set a default period
-	if job.Period == 0 {
-		jobPeriod = 300
-	} else {
-		jobPeriod = job.Period
-=======
-	var length int
-
-	// Why is this here? 120?
-	if job.Length == 0 {
-		length = 120
-	} else {
-		length = job.Length
->>>>>>> 39e93c9... Collect period handling into one method
-	}
 
 	tagSemaphore <- struct{}{}
 	commonResources, err := clientTag.get(job, region)
@@ -250,13 +232,6 @@ func scrapeDiscoveryJobUsingMetricData(
 						log.Infof("job: %s, resource: %v/%v, fetchedMetrics: %v, stats: %v", job.Type, *resource.Service, *resource.ID, fetchedMetrics, stats)
 						id := fmt.Sprintf("id_%d", rand.Int())
 
-<<<<<<< HEAD
-						period := int64(jobPeriod)
-						if metric.Period != 0 {
-							period = int64(metric.Period)
-						}
-=======
->>>>>>> 39e93c9... Collect period handling into one method
 						addCloudwatchTimestamp := job.AddCloudwatchTimestamp || metric.AddCloudwatchTimestamp
 
 						mux.Lock()
@@ -272,7 +247,7 @@ func scrapeDiscoveryJobUsingMetricData(
 							CustomTags:             job.CustomTags,
 							Dimensions:             fetchedMetrics.Dimensions,
 							Region:                 &region,
-							Period:                 metricPeriod(job, metric),
+							Period:                 getMetricPeriod(job, metric),
 						})
 						mux.Unlock()
 					}
