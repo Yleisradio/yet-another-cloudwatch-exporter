@@ -150,16 +150,14 @@ func scrapeDiscoveryJobUsingMetricData(
 
 	// Set a default period
 	if job.Period == 0 {
-	    jobPeriod = 300
+		jobPeriod = 300
 	} else {
-	    jobPeriod = job.Period
+		jobPeriod = job.Period
 	}
 
 	tagSemaphore <- struct{}{}
 	commonResources, err := clientTag.get(job, region)
-	if job.Type == "acm-certificates" {
-		log.Infof("job: %s, clientTag.get returned %d resources and %v err", job.Type, len(resources), err)
-	}
+	log.Infof("job: %s, clientTag.get returned %d resources and %v err", job.Type, len(resources), err)
 	<-tagSemaphore
 
 	// Add the info tags of all the resources
@@ -176,9 +174,7 @@ func scrapeDiscoveryJobUsingMetricData(
 	// Get the awsDimensions of the job configuration
 	// Common for all the metrics of the job
 	commonJobDimensions := getAwsDimensions(job)
-	if job.Type == "acm-certificates" {
-		log.Infof("job.Type: %s, job.Metrics: %v, commonJobDimensions: %v", job.Type, job.Metrics, commonJobDimensions)
-	}
+	log.Infof("job.Type: %s, job.Metrics: %v, commonJobDimensions: %v", job.Type, job.Metrics, commonJobDimensions)
 
 	// For every metric of the job
 	for j := range job.Metrics {
@@ -194,13 +190,9 @@ func scrapeDiscoveryJobUsingMetricData(
 		tagSemaphore <- struct{}{}
 		fullMetricsList := getFullMetricsList(&job.Type, metric, clientCloudwatch)
 		<-tagSemaphore
-		if job.Type == "acm-certificates" {
-			log.Infof("job: %s, metric: %v, fullMetricsList: %v", job.Type, metric, fullMetricsList)
-		}
+		log.Infof("job: %s, metric: %v, fullMetricsList: %v", job.Type, metric, fullMetricsList)
 		if len(commonResources) == 0 {
-			if job.Type == "acm-certificates" {
-				log.Info("NO commonresources, fetching resources from detectResourcesByService")
-			}
+			log.Info("NO commonresources, fetching resources from detectResourcesByService")
 			resources = detectResourcesByService(job.Type, region, fullMetricsList.Metrics)
 		} else {
 			log.Info("GOING WITH commonresources")
@@ -211,39 +203,31 @@ func scrapeDiscoveryJobUsingMetricData(
 		for i := range resources {
 			resource := resources[i]
 			metricTags := resource.metricTags(tagsOnMetrics)
-			if job.Type == "acm-certificates" {
-				log.Infof("job: %s, resource: %v/%v, metricTags: %v", job.Type, *resource.Service, *resource.ID, metricTags)
-			}
+			log.Infof("job: %s, resource: %v/%v, metricTags: %v", job.Type, *resource.Service, *resource.ID, metricTags)
 
 			// Creates the dimensions with values for the resource depending on the namespace of the job (p.e. InstanceId=XXXXXXX)
 			dimensionsWithValue := detectDimensionsByService(resource.Service, resource.ID, fullMetricsList)
 
 			// Adds the dimensions with values of that specific metric of the job
 			dimensionsWithValue = addAdditionalDimensions(dimensionsWithValue, metric.AdditionalDimensions)
-			if job.Type == "acm-certificates" {
-				log.Infof("job: %s, resource: %v/%v, dimensionsWithValue: %v", job.Type, *resource.Service, *resource.ID, dimensionsWithValue)
-			}
+			log.Infof("job: %s, resource: %v/%v, dimensionsWithValue: %v", job.Type, *resource.Service, *resource.ID, dimensionsWithValue)
 
 			// Filter the commonJob Dimensions by the discovered/added dimensions as duplicates cause no metrics to be discovered
 			commonJobDimensions = filterDimensionsWithoutValueByDimensionsWithValue(commonJobDimensions, dimensionsWithValue)
 
 			metricsToAdd := filterMetricsBasedOnDimensionsWithValues(dimensionsWithValue, commonJobDimensions, fullMetricsList)
-			if job.Type == "acm-certificates" {
-				log.Infof("job: %s, resource: %v/%v, metricsToAdd: %v", job.Type, *resource.Service, *resource.ID, metricsToAdd)
-			}
+			log.Infof("job: %s, resource: %v/%v, metricsToAdd: %v", job.Type, *resource.Service, *resource.ID, metricsToAdd)
 
 			// If the job property inlyInfoIfData is true
 			if metricsToAdd != nil {
 				for _, fetchedMetrics := range metricsToAdd.Metrics {
 					for _, stats := range metric.Statistics {
-						if job.Type == "acm-certificates" {
-							log.Infof("job: %s, resource: %v/%v, fetchedMetrics: %v, stats: %v", job.Type, *resource.Service, *resource.ID, fetchedMetrics, stats)
-						}
+						log.Infof("job: %s, resource: %v/%v, fetchedMetrics: %v, stats: %v", job.Type, *resource.Service, *resource.ID, fetchedMetrics, stats)
 						id := fmt.Sprintf("id_%d", rand.Int())
 
 						period := int64(jobPeriod)
-						if(metric.Period != 0) {
-						    period = int64(metric.Period)
+						if metric.Period != 0 {
+							period = int64(metric.Period)
 						}
 						addCloudwatchTimestamp := job.AddCloudwatchTimestamp || metric.AddCloudwatchTimestamp
 
@@ -272,9 +256,7 @@ func scrapeDiscoveryJobUsingMetricData(
 	maxMetricCount := *metricsPerQuery
 	metricDataLength := len(getMetricDatas)
 	partition := int(math.Ceil(float64(metricDataLength) / float64(maxMetricCount)))
-	if job.Type == "acm-certificates" {
-		log.Infof("job.Type: %s, metricDataLength: %d, maxMetricCount: %d, partition: %d", job.Type, metricDataLength, maxMetricCount, partition)
-	}
+	log.Infof("job.Type: %s, metricDataLength: %d, maxMetricCount: %d, partition: %d", job.Type, metricDataLength, maxMetricCount, partition)
 	wg.Add(partition)
 	for i := 0; i < metricDataLength; i += maxMetricCount {
 		go func(i int) {
