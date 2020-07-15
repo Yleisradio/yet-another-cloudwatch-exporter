@@ -142,20 +142,13 @@ func (iface tagsInterface) get(job job, region string) (resources []*tagsData, e
 		filter = append(filter, aws.String("ec2:vpn-connection"))
 	case "kafka":
 		filter = append(filter, aws.String("kafka:cluster"))
-	case "acm-certificates":
-		return []*tagsData{}, nil // covered by detectResourcesByMetrics
-	case "yle-ec2":
-		return []*tagsData{}, nil // covered by detectResourcesByMetrics
-	case "yle-ecs":
+	case "acm-certificates", "yle-ec2", "yle-ecs":
 		return []*tagsData{}, nil // covered by detectResourcesByMetrics
 	default:
 		// debug with `aws resourcegroupstaggingapi get-resources --resource-type-filters '["ecs:cluster", "ecs:service"]'`
 		log.Fatal("Not implemented resources:" + job.Type)
 	}
 
-	if job.Type == "acm-certificates" {
-		log.Infof("job.Type: %s, filter:%v", job.Type, filter)
-	}
 	inputparams := r.GetResourcesInput{ResourceTypeFilters: filter}
 	ctx := context.Background()
 	pageNum := 0
