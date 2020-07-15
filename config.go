@@ -91,9 +91,6 @@ func (c *conf) load(file *string) error {
 				return fmt.Errorf("Period value should be a positive integer")
 			}
 		}
-		if job.RoleArn != "" {
-			job.RoleArns = []string{job.RoleArn}
-		}
 	}
 	for n, job := range c.Static {
 		if len(job.RoleArns) == 0 {
