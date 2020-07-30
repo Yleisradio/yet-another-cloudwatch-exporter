@@ -3,8 +3,12 @@ package exporter
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -65,8 +69,37 @@ type Tag struct {
 	Value string `yaml:"value"`
 }
 
+func (c *ScrapeConf) s3elements(url string) (bucket, key string) {
+	fields := strings.SplitN(url, "/", 4)
+	if len(fields) < 4 {
+		return "", ""
+	}
+	bucket = fields[2]
+	key = fields[3]
+	return bucket, key
+}
+
+func (c *ScrapeConf) loadContent(file string) ([]byte, error) {
+	if strings.HasPrefix(file, "s3://") {
+		bucket, key := c.s3elements(file)
+		sess, err := session.NewSession(&aws.Config{})
+		if err != nil {
+			return nil, err
+		}
+		downloader := s3manager.NewDownloader(sess)
+		buf := aws.NewWriteAtBuffer([]byte{})
+		_, err = downloader.Download(buf,
+			&s3.GetObjectInput{
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			})
+		return buf.Bytes(), err
+	}
+	return ioutil.ReadFile(file)
+}
+
 func (c *ScrapeConf) Load(file *string) error {
-	yamlFile, err := ioutil.ReadFile(*file)
+	yamlFile, err := c.loadContent(*file)
 	if err != nil {
 		return err
 	}
