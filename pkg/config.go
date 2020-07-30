@@ -82,17 +82,17 @@ func (c *ScrapeConf) s3elements(url string) (bucket, key string) {
 func (c *ScrapeConf) loadContent(file string) ([]byte, error) {
 	if strings.HasPrefix(file, "s3://") {
 		bucket, key := c.s3elements(file)
-		sess, err := session.NewSession(&aws.Config{})
-		if err != nil {
-			return nil, err
-		}
+		sess := session.Must(session.NewSessionWithOptions(session.Options{
+			SharedConfigState: session.SharedConfigEnable,
+		}))
 		downloader := s3manager.NewDownloader(sess)
 		buf := aws.NewWriteAtBuffer([]byte{})
-		_, err = downloader.Download(buf,
+		nBytes, err := downloader.Download(buf,
 			&s3.GetObjectInput{
 				Bucket: aws.String(bucket),
 				Key:    aws.String(key),
 			})
+                log.Infof("Downloaded %d bytes from %s", nBytes, file)
 		return buf.Bytes(), err
 	}
 	return ioutil.ReadFile(file)
