@@ -55,7 +55,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *debug {
+	if *debug || len(os.Getenv("YACE_DEBUG")) > 0 {
 		log.SetLevel(log.DebugLevel)
 	}
 
@@ -102,7 +102,6 @@ func main() {
 				newRegistry := prometheus.NewRegistry()
 				endtime := exporter.UpdateMetrics(config, newRegistry, now, *metricsPerQuery, *fips, *debug, *floatingTimeWindow, *labelsSnakeCase, cloudwatchSemaphore, tagSemaphore)
 				now = endtime
-				log.Debug("Metrics scraped.")
 				registry = newRegistry
 				t1 := time.Now()
 				processingtime := t1.Sub(t0)

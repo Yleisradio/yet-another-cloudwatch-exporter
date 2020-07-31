@@ -92,7 +92,7 @@ func (c *ScrapeConf) loadContent(file string) ([]byte, error) {
 				Bucket: aws.String(bucket),
 				Key:    aws.String(key),
 			})
-                log.Infof("Downloaded %d bytes from %s", nBytes, file)
+		log.Infof("Downloaded %d bytes from %s", nBytes, file)
 		return buf.Bytes(), err
 	}
 	return ioutil.ReadFile(file)
