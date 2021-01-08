@@ -7,7 +7,7 @@ import (
 func TestConfLoad(t *testing.T) {
 	config = conf{}
 	configFile := "config_test.yml"
-	if err := config.load(&configFile); err != nil {
+	if err := config.load(configFile); err != nil {
 		t.Error(err)
 	}
 }
