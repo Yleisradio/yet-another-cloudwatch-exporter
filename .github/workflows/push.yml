@@ -16,6 +16,8 @@ jobs:
       run: |
         VERSION=$(_ci/version.sh)
         DOCKER_IMAGE="$ECR_REPOSITORY:$VERSION"
-        eval $(aws ecr get-login --no-include-email --region eu-west-1)
+        aws --region eu-west-1 ecr get-login-password \
+        | docker login --password-stdin --username AWS \
+        | 352476883983.dkr.ecr.eu-west-1.amazonaws.com
         docker build --build-arg VERSION=$VERSION -t "$DOCKER_IMAGE" .
         docker push "$DOCKER_IMAGE"
