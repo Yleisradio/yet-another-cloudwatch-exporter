@@ -127,7 +127,7 @@ func (iface tagsInterface) get(job *Job, region string) (resources []*tagsData, 
 					resource.Tags = append(resource.Tags, &Tag{Key: *t.Key, Value: *t.Value})
 				}
 
-				if resource.filterThroughTags(job.SearchTags) {
+				if len(job.SearchTags) == 0 || resource.filterThroughTags(job.SearchTags) {
 					resources = append(resources, &resource)
 				} else {
 					log.Debugf("Skipping resource %s because search tags do not match", *resource.ID)

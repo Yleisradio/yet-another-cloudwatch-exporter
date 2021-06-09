@@ -48,6 +48,7 @@ func init() {
 }
 
 func main() {
+	var err error
 	flag.Parse()
 
 	if *showVersion {
@@ -57,18 +58,24 @@ func main() {
 
 	if *debug || len(os.Getenv("YACE_DEBUG")) > 0 {
 		log.SetLevel(log.DebugLevel)
+		log.Debug("Logging level set to debug")
 	}
 
 	log.Println("Parse config..")
-	if err := config.Load(configFile); err != nil {
-		log.Fatal("Couldn't read ", *configFile, ": ", err)
+	for _, cf := range []string{*configFile, os.Getenv("CONFIG_FILE")} {
+		err = config.Load(&cf)
+		if err == nil {
+			if *verifyConfig {
+				log.Info("Config ", cf, " is valid")
+				os.Exit(0)
+			}
+			break
+		}
+		log.Error("Couldn't read ", cf, ": ", err)
+	}
+	if err != nil {
 		os.Exit(1)
 	}
-	if *verifyConfig {
-		log.Info("Config ", *configFile, " is valid")
-		os.Exit(0)
-	}
-
 	cloudwatchSemaphore := make(chan struct{}, *cloudwatchConcurrency)
 	tagSemaphore := make(chan struct{}, *tagConcurrency)
 
