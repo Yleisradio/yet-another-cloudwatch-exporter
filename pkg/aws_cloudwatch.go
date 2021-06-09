@@ -65,7 +65,7 @@ func createStsSession(roleArn string, debug bool) *sts.STS {
 func createCloudwatchSession(region *string, roleArn string, fips, debug bool) *cloudwatch.CloudWatch {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
-		Config: aws.Config{Region: aws.String(*region)},
+		Config:            aws.Config{Region: aws.String(*region)},
 	}))
 
 	maxCloudwatchRetries := 5
@@ -365,7 +365,7 @@ func createPrometheusLabels(cwd *cloudwatchData, labelsSnakeCase bool) map[strin
 
 	// Inject the sfn name back as a label
 	for _, dimension := range cwd.Dimensions {
-		labels["dimension_"+promStringTag(*dimension.Name, labelsSnakeCase)] = *dimension.Value
+		labels[promStringTag(*dimension.Name, labelsSnakeCase)] = *dimension.Value
 	}
 
 	for _, label := range cwd.CustomTags {
