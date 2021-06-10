@@ -130,7 +130,7 @@ func (iface tagsInterface) get(job *Job, region string) (resources []*tagsData, 
 				if len(job.SearchTags) == 0 || resource.filterThroughTags(job.SearchTags) {
 					resources = append(resources, &resource)
 				} else {
-					log.Debugf("Skipping resource %s because search tags do not match", *resource.ID)
+					log.Debugf("Skipping resource %s because search tags (%+v) do not match", *resource.ID, job.SearchTags)
 				}
 			}
 			return pageNum < 100
