@@ -101,10 +101,12 @@ func (c *ScrapeConf) loadContent(file string) ([]byte, error) {
 func (c *ScrapeConf) Load(file *string) error {
 	yamlFile, err := c.loadContent(*file)
 	if err != nil {
+		log.Error("config file fetching failed")
 		return err
 	}
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
+		log.Error("config file unmarshal failed")
 		return err
 	}
 
@@ -121,6 +123,7 @@ func (c *ScrapeConf) Load(file *string) error {
 
 	err = c.validate()
 	if err != nil {
+		log.Error("config file validation failed")
 		return err
 	}
 	return nil
@@ -128,7 +131,7 @@ func (c *ScrapeConf) Load(file *string) error {
 
 func (c *ScrapeConf) validate() error {
 	if c.Discovery.Jobs == nil && c.Static == nil {
-		return fmt.Errorf("At least 1 Discovery job or 1 Static must be defined")
+		return fmt.Errorf("at least 1 Discovery job or 1 Static must be defined")
 	}
 
 	if c.Discovery.Jobs != nil {
