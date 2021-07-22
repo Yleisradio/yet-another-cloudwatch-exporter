@@ -101,7 +101,7 @@ func (c *ScrapeConf) loadContent(file string) ([]byte, error) {
 func (c *ScrapeConf) Load(file *string) error {
 	yamlFile, err := c.loadContent(*file)
 	if err != nil {
-		log.Error("config file fetching failed")
+		log.Errorf("config file fetching failed due to %v", err)
 		return err
 	}
 	err = yaml.Unmarshal(yamlFile, c)
