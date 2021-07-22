@@ -65,8 +65,8 @@ func main() {
 	for _, cf := range []string{*configFile, os.Getenv("CONFIG_FILE")} {
 		err = config.Load(&cf)
 		if err == nil {
+			log.Info("Config ", cf, " is valid")
 			if *verifyConfig {
-				log.Info("Config ", cf, " is valid")
 				os.Exit(0)
 			}
 			break
